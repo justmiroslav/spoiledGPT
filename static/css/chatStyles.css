@@ -1,0 +1,143 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #e0cdc9;
+}
+
+header {
+    margin: 1em 1em 0 1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+img {
+    width: auto;
+    height: 2em;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+    color: #1a2a29;
+}
+
+p {
+    font-size: 1.25em;
+}
+
+#ai-icon, #summarized-title {
+    display: flex;
+    padding-bottom: 0;
+}
+
+#ai-icon img {
+    margin-right: 0.5em;
+}
+
+#ai-icon p {
+    margin-top: 0.05em;
+    font-weight: bold;
+}
+
+#summarized-title i {
+    margin-top: 0.55em;
+    margin-right: 0.25em;
+}
+
+#summarized-title p {
+    font-style: italic;
+    margin-top: 0.08em;
+    color: #1a2a29;
+}
+
+#user-icon {
+    margin-top: -0.7em;
+}
+
+main {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#chatbot {
+    background-color: transparent;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    height: 400px;
+    overflow-y: auto;
+}
+
+#chatbot .user {
+    background-color: #1a2a29;
+    color: #e0cdc9;
+    border-radius: 15px 0 15px 15px;
+    padding: 10px;
+    margin: 5px;
+    position: relative;
+    text-align: right;
+}
+
+#chatbot .user::after {
+    content: "User";
+    font-weight: bold;
+    position: absolute;
+    margin-left: 0.75em;
+    color: #1a2a29;
+}
+
+#chatbot .assistant {
+    background-color: #0d1514;
+    color: #e0cdc9;
+    border-radius: 0 15px 15px 15px;
+    padding: 10px;
+    margin: 5px;
+    position: relative;
+    text-align: left;
+}
+
+#chatbot .assistant::before {
+    content: "Assistant";
+    font-weight: bold;
+    position: absolute;
+    margin-left: -5em;
+    color: #0d1514;
+}
+
+#message-send {
+    align-self: center;
+    border: 1px solid #1a2a29;
+    border-radius: 100px;
+    position: fixed;
+    bottom: 2em;
+    width: 50%;
+    padding: 0.5em;
+}
+
+#message-send input {
+    background: transparent;
+    border: none;
+    width: 95%;
+    height: 2em;
+    border-radius: 100px;
+    padding-left: 0.5em;
+}
+
+input:focus {
+    outline: none;
+}
+
+#message-send input::placeholder {
+    color: #1a2a29;
+}
+
+#message-send button {
+    border: none;
+    height: 2em;
+    width: 2em;
+    border-radius: 100px;
+    background-color: #1a2a29;
+    color: #fff;
+    cursor: pointer;
+}
