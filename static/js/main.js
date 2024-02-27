@@ -1,12 +1,13 @@
-const chatDatabaseController = require('/controllers/chatDatabaseController');
-const messageController = require('/controllers/messageController');
+import chatDatabaseController from '/controllers/chatDatabaseController';
+import messageController from '/controllers/messageController';
 const submitButton = document.getElementById('main-start-button');
 const userInput = document.getElementById('main-user-input');
-const sendToWebSocket = require('/updateChat');
+import sendToWebSocket from '/updateChat';
 
 function sendMessage() {
     const userInput = document.getElementById('main-user-input');
-    const newChat = chatDatabaseController.addChat();
+    const newChat = chatDatabaseController.addChat("Untitled chat");
+    console.log(newChat._id);
     messageController.createMessage(newChat._id, 'user', userInput.value, 1);
     sendToWebSocket(userInput.value, 'libra');
     userInput.value = '';

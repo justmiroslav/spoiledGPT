@@ -1,6 +1,11 @@
 const chatModel = require('../models/chatModel');
 const messageModel = require('../models/messageModel');
 const sortChats = require('../helpers/sortChats');
+const mongoose = require('mongoose');
+
+async function addChat(title) {
+    await new chatModel({title: title}).save();
+}
 
 async function getMainPage(req, res) {
     let chats = await chatModel.find().sort({ date: -1 });
@@ -9,17 +14,19 @@ async function getMainPage(req, res) {
 }
 
 async function getChat(req, res) {
-    const chatId = req.params.id;
-    const chat = await chatModel.findOne({ _id: chatId });
-    const messages = await messageModel.find({ chatId: chatId });
+    const chat = await chatModel.findOne({ _id: req.params.id });
+    const messages = await messageModel.find({ chatId: chat._id });
     res.render('chat', { title: chat.title, messages: messages });
 }
 
-async function addChat() {
-    await new chatModel().save();
+async function getChatIdByTitle(title) {
+    await chatModel.findOne({ title: title });
 }
 
 async function updateChat (chatId, title) {
+    if (!mongoose.Types.ObjectId.isValid(chatId)) {
+        throw new Error('Invalid chatId');
+    }
     await chatModel.updateOne({ _id: chatId }, { title: title });
 }
 
@@ -33,6 +40,7 @@ async function removeAllChats() {
 
 module.exports = {
     getMainPage,
+    getChatIdByTitle,
     getChat,
     addChat,
     updateChat,

@@ -1,7 +1,8 @@
-const mongoose = require('mongoose');
+const mongoConnection = require('../connections/mongoConnection');
+const mongoose = mongoConnection.mongo;
 
 const messageSchema = new mongoose.Schema({
-    chatId: String,
+    chatId: mongoose.Schema.Types.ObjectId,
     sender: String,
     message: String,
     count: Number,

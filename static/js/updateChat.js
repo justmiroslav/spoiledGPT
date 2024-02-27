@@ -1,13 +1,14 @@
 const ws = new WebSocket('ws://127.0.0.1:1337');
-const chatDatabaseController = require('/controllers/chatDatabaseController');
-const messageController = require('/controllers/messageController');
+import chatDatabaseController from '/controllers/chatDatabaseController';
+import messageController from '/controllers/messageController';
 const chatContent = document.getElementById('chat-content');
 const messageInput = document.getElementById('user-input');
 const summarizedTitle = document.getElementById('summarized-title');
 const submitButton = document.getElementById('submit-button');
-const chatId = window.location.pathname.split('/').pop();
 const summary = document.getElementById('summary');
-const { context } = require('/controllers/chatController');
+import chatController from '/controllers/chatController';
+const chatId = chatDatabaseController.getChatIdByTitle("Untitled chat");
+let context = chatController.context;
 let messageCounter = messageController.returnMessagesCount(chatId);
 let FirstAnswerChunk = true;
 let messageP = null;
@@ -37,14 +38,14 @@ window.onload = function() {
             chatContent.appendChild(cancelButton);
             editButton.addEventListener('click', function() {
                 messageController.deleteSelectedMessage(chatId, message.count);
-                messageController.updateMessage(chatId, editIcon.id, editInput.value);
+                messageController.updateMessage(message._id, editInput.value);
                 messageCounter = message.count;
                 const index = context.findIndex(item => item["content"] === messageP.textContent);
                 context.splice(index);
                 sendToWebSocket(editInput.value, modelSelector.value);
             });
             cancelButton.addEventListener('click', function() {
-                window.location.href = `/chat/${chatId}`;
+                window.location.href = `/${chatId}`;
             });
         });
         copyIcon.addEventListener('click', function() {
@@ -157,7 +158,7 @@ ws.onmessage = function(event) {
         summaryP.textContent += data.content;
         summaryCounter++;
         if (summaryCounter === summaryLength) {
-            chatDatabaseController.updateChat(summaryP.textContent);
+            chatDatabaseController.updateChat(chatId, summaryP.textContent);
             summaryP = null;
             summaryCounter = 0;
             FirstSummaryChunk = true;
@@ -185,12 +186,11 @@ summary.addEventListener('click', function() {
         renamePanel.appendChild(renameButton);
         renamePanel.appendChild(cancelButton);
         document.body.appendChild(renamePanel);
-        const chatId = window.location.pathname.split('/').pop();
         renameButton.addEventListener('click', function() {
-            chatDatabaseController.updateChat(chatId, renameInput.value).then(() => {window.location.href = `/chat/${chatId}`;});
+            chatDatabaseController.updateChat(chatId, renameInput.value).then(() => {window.location.href = `/${chatId}`;});
         });
         cancelButton.addEventListener('click', function() {
-            window.location.href = `/chat/${chatId}`;
+            window.location.href = `/${chatId}`;
         });
     });
     deleteOption.addEventListener('click', function() {
@@ -209,7 +209,7 @@ summary.addEventListener('click', function() {
             chatDatabaseController.removeChat(chatId).then(() => {window.location.href = '/';});
         });
         cancelButton.addEventListener('click', function() {
-            window.location.href = `/chat/${chatId}`;
+            window.location.href = `/${chatId}`;
         });
     });
 });

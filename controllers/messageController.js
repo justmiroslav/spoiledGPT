@@ -1,7 +1,7 @@
 const messageModel = require('../models/messageModel');
 
 async function createMessage(chatId, sender, message, count) {
-    await new messageModel({ chatId, sender, message, count }).save();
+    await new messageModel({ chatId: chatId, sender: sender, message: message, count: count }).save();
 }
 
 async function getMessages(chatId) {
@@ -16,8 +16,8 @@ function returnMessagesCount(chatId) {
     return messageModel.countDocuments({ chatId: chatId });
 }
 
-async function updateMessage(chatId, messageId, message) {
-    await messageModel.updateOne({ _id: messageId, chatId: chatId }, { message: message });
+async function updateMessage(messageId, message) {
+    await messageModel.updateOne({ _id: messageId }, { message: message });
 }
 
 async function deleteSelectedMessage(chatId, messageCounter) {

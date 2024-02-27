@@ -28,4 +28,5 @@ function updateChat(ws) {
 
 module.exports = {
     updateChat,
+    context
 };

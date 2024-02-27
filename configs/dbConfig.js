@@ -1,3 +1,3 @@
-const dbConnection = "mongodb+srv://mirosmale:KnH9Lk8e2sIw3DWT@express-cluster.r2uhoqg.mongodb.net/?retryWrites=true&w=majority"
+const dbConnection = "mongodb+srv://miros:bDB65Srl5qPtYbX4@spoiledcluster.ansmkua.mongodb.net/?retryWrites=true&w=majority&appName=spoiledCluster"
 
 module.exports = dbConnection;

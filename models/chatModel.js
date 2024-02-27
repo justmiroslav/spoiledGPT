@@ -1,7 +1,8 @@
-const mongoose = require('mongoose');
+const mongoConnection = require('../connections/mongoConnection');
+const mongoose = mongoConnection.mongo;
 
 const chatSchema = new mongoose.Schema({
-    title: {type: String, default: "Untitled chat"},
+    title: String,
     date: {type: Date, default: Date.now}
 });
 
