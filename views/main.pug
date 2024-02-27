@@ -26,6 +26,6 @@ html(lang="en")
                 each group, groupName in chats
                     h2= groupName
                     each chat in group
-                        a(href=`/#{chat.id}`)
-                            button #{chat.title}
-        script(type="module", src="/js/main.js")
+                        a(href=`/${chat._id}`)
+                            button(type="submit") #{chat.title}
+        script(type="module", src="/js/mainScripts.js")

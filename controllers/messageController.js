@@ -1,29 +1,69 @@
-const messageModel = require('../models/messageModel');
+const Message = require('../models/messageModel');
 
-async function createMessage(chatId, sender, message, count) {
-    await new messageModel({ chatId: chatId, sender: sender, message: message, count: count }).save();
+async function createMessage(req, res) {
+    const { chatId } = req.params;
+    const { sender, message, count } = req.body;
+    try {
+        const newMessage = await new Message({ chatId: chatId, sender: sender, message: message, count: count });
+        newMessage.save();
+        res.status(200).json({newMessage: newMessage});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
 }
 
-async function getMessages(chatId) {
-     await messageModel.find({ chatId: chatId });
+async function getMessages(req, res) {
+    const { chatId } = req.params;
+    try {
+        const messages = await Message.find({chatId: chatId});
+        res.status(200).json({messages: messages});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
 }
 
-async function getMessage(chatId, count) {
-    await messageModel.findOne({ chatId: chatId, count: count});
+async function getMessage(req, res) {
+    const { chatId } = req.params;
+    const { count } = req.body;
+    try {
+        const message = await Message.findOne({chatId: chatId, count: count});
+        res.status(200).json({findMessage: message});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
 }
 
-function returnMessagesCount(chatId) {
-    return messageModel.countDocuments({ chatId: chatId });
+async function returnMessagesCount(req, res) {
+    const { chatId } = req.params;
+    try {
+        const count = await Message.countDocuments({chatId: chatId});
+        res.status(200).json({count: count});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
 }
 
-async function updateMessage(messageId, message) {
-    await messageModel.updateOne({ _id: messageId }, { message: message });
+async function updateMessage(req, res) {
+    const { id } = req.params;
+    const { message } = req.body;
+    try {
+        await Message.updateOne({_id: id}, {message: message});
+        res.status(200).json({updateMessage: 'Message updated'});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
 }
 
-async function deleteSelectedMessage(chatId, messageCounter) {
-    await messageModel.deleteMany({ chatId: chatId, count: { $gt: messageCounter } });
+async function deleteSelectedMessage(req, res) {
+    const { chatId } = req.params;
+    const { count } = req.body;
+    try {
+        await Message.deleteMany({chatId: chatId, count: {$gt: count}});
+        res.status(200).json({deleteMessage: 'Messages removed'});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
 }
-
 
 module.exports = {
     createMessage,

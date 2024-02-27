@@ -49,10 +49,6 @@ p {
     color: #1a2a29;
 }
 
-#user-icon {
-    margin-top: -0.7em;
-}
-
 #model-description {
     margin-top: 1em;
 }
@@ -65,7 +61,7 @@ main {
     align-items: center;
 }
 
-#chatbot {
+#chat-content {
     background-color: transparent;
     border-radius: 10px;
     padding: 20px;
@@ -74,7 +70,7 @@ main {
     overflow-y: auto;
 }
 
-#chatbot .user {
+#chat-content .user {
     background-color: #1a2a29;
     color: #e0cdc9;
     border-radius: 15px 0 15px 15px;
@@ -84,7 +80,7 @@ main {
     text-align: right;
 }
 
-#chatbot .user::after {
+#chat-content .user::after {
     content: "User";
     font-weight: bold;
     position: absolute;
@@ -92,7 +88,7 @@ main {
     color: #1a2a29;
 }
 
-#chatbot .assistant {
+#chat-content .assistant {
     background-color: #0d1514;
     color: #e0cdc9;
     border-radius: 0 15px 15px 15px;
@@ -102,7 +98,7 @@ main {
     text-align: left;
 }
 
-#chatbot .assistant::before {
+#chat-content .assistant::before {
     content: "Assistant";
     font-weight: bold;
     position: absolute;

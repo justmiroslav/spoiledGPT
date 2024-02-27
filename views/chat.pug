@@ -10,8 +10,9 @@ html(lang="en")
     body
         header
             #ai-icon
-                img(src="/img/mainIcon.jpg", alt="")
-                p SpoiledGPT
+                a(href="/")
+                    img(src="/img/mainIcon.jpg", alt="")
+                    p SpoiledGPT
             #summarized-title
             if title
                 i.fas.fa-chevron-down
@@ -23,15 +24,11 @@ html(lang="en")
         main
             #chat-content
                 each message in messages
-                    if message.sender === 'user'
-                        p(class=message.sender, id=message._id)
-                            span= message.message
+                    p(class=message.sender, id=message._id)= message.message
+                        if message.sender === 'user'
                             span
                                 i.fas.fa-pencil-alt(id=message._id)
-                                | edit
-                    else if message.sender === 'assistant'
-                        p(class=message.sender, id=message._id)
-                            span= message.message
+                        else if message.sender === 'assistant'
                             span
                                 i.fas.fa-copy(id=message._id)
                                 | copy
@@ -42,4 +39,4 @@ html(lang="en")
                 input(type="text", id="user-input", autocomplete="off", name="message", placeholder="Send message...")
                 button(id="submit-button")
                     i.fas.fa-arrow-up
-        script(type="module", src="/js/updateChat.js")
+        script(type="module", src="/js/chatScripts.js")
