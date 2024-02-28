@@ -35,71 +35,59 @@ window.onload = async function() {
         }
     });
 
-    const response = await fetch(`/message/get/all/${chatId}`, { method: "GET" });
-    const messagesNotParsed = await response.json();
-    if (!response.ok) {
-        throw new Error(messagesNotParsed.message);
-    }
-    const messages = messagesNotParsed.messages;
-    console.log(messages);
-    messages.forEach(message => {
-        console.log(message);
-        const editIcon = document.getElementById(message._id);
-        const copyIcon = document.getElementById(message._id);
-        const retryIcon = document.getElementById(message._id);
-        editIcon.addEventListener('click', function() {
-            const messageP = document.getElementById(editIcon.id);
-            const editInput = document.createElement('input');
-            const editButton = document.createElement('button');
-            const cancelButton = document.createElement('button');
-            editInput.value = messageP.textContent;
-            editButton.textContent = 'Edit';
-            cancelButton.textContent = 'Cancel';
-            chatContent.appendChild(editInput);
-            chatContent.appendChild(editButton);
-            chatContent.appendChild(cancelButton);
-            editButton.addEventListener('click', async function() {
-                const deleteResponse = await fetch(`/message/delete/${chatId}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count: message.count })});
-                const deleteData = await deleteResponse.json();
-                if (!deleteResponse.ok) {
-                    throw new Error(deleteData.message);
-                }
-                const updateResponse = await fetch(`/message/update/${message._id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: editInput.value })});
-                const updateData = await updateResponse.json();
-                if (!updateResponse.ok) {
-                    throw new Error(updateData.message);
-                }
-                messageCounter = message.count;
-                const index = context.findIndex(item => item["content"] === messageP.textContent);
-                context.splice(index);
-                sendToWebSocket(editInput.value, modelSelector.value, context);
-            });
-            cancelButton.addEventListener('click', function() {
-                window.location.href = `/${chatId}`;
-            });
-        });
-        copyIcon.addEventListener('click', function() {
-            const messageP = document.getElementById(copyIcon.id);
-            navigator.clipboard.writeText(messageP.textContent);
-        });
-        retryIcon.addEventListener('click', async function() {
-            const messageNotParsed = await fetch(`/message/get/${chatId}`, { method: "GET", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count: message.count - 1 })});
-            const messageDb = await messageNotParsed.json();
-            if (!messageNotParsed.ok) {
-                throw new Error(messageDb.message);
-            }
-            const messageP = messageDb.findMessage;
-            const response = await fetch(`/message/delete/${chatId}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count: message.count - 1 })});
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message);
-            }
-            messageCounter = message.count - 1;
-            const index = context.findIndex(item => item["content"] === messageP);
-            context.splice(index);
-            sendToWebSocket(messageP, modelSelector.value, context);
-        });
-    });
+    // const response = await fetch(`/message/get/all/${chatId}`, { method: "GET" });
+    // const messagesNotParsed = await response.json();
+    // if (!response.ok) {
+    //     throw new Error(messagesNotParsed.message);
+    // }
+    // const messages = messagesNotParsed.messages;
+    // console.log(messages);
+    // messages.forEach(message => {
+    //     console.log(message);
+    //     const editIcon = document.getElementById(message._id);
+    //     const copyIcon = document.getElementById(message._id);
+    //     const retryIcon = document.getElementById(message._id);
+    //     editIcon.addEventListener('click', function() {
+    //         const messageP = document.getElementById(editIcon.id);
+    //         const editInput = document.createElement('input');
+    //         const editButton = document.createElement('button');
+    //         const cancelButton = document.createElement('button');
+    //         editInput.value = messageP.textContent;
+    //         editButton.textContent = 'Edit';
+    //         cancelButton.textContent = 'Cancel';
+    //         chatContent.appendChild(editInput);
+    //         chatContent.appendChild(editButton);
+    //         chatContent.appendChild(cancelButton);
+    //         editButton.addEventListener('click', async function() {
+    //             await fetch(`/message/delete/${chatId}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count: message.count })});
+    //             await fetch(`/message/update/${message._id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: editInput.value })});
+    //             messageCounter = message.count;
+    //             const index = context.findIndex(item => item["content"] === messageP.textContent);
+    //             context.splice(index);
+    //             sendToWebSocket(editInput.value, modelSelector.value, context);
+    //         });
+    //         cancelButton.addEventListener('click', function() {
+    //             window.location.href = `/${chatId}`;
+    //         });
+    //     });
+    //     copyIcon.addEventListener('click', function() {
+    //         const messageP = document.getElementById(copyIcon.id);
+    //         navigator.clipboard.writeText(messageP.textContent);
+    //     });
+    //     retryIcon.addEventListener('click', async function() {
+    //         const messageNotParsed = await fetch(`/message/get/${chatId}`, { method: "GET", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count: message.count - 1 })});
+    //         const messageDb = await messageNotParsed.json();
+    //         if (!messageNotParsed.ok) {
+    //             throw new Error(messageDb.message);
+    //         }
+    //         const messageP = messageDb.findMessage;
+    //         await fetch(`/message/delete/${chatId}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count: message.count - 1 })});
+    //         messageCounter = message.count - 1;
+    //         const index = context.findIndex(item => item["content"] === messageP);
+    //         context.splice(index);
+    //         sendToWebSocket(messageP, modelSelector.value, context);
+    //     });
+    // });
 }
 
 function sendToWebSocket(message, model, context) {
@@ -193,11 +181,7 @@ ws.onmessage = async function(event) {
         summaryP.textContent += data.content;
         summaryCounter++;
         if (summaryCounter === summaryLength) {
-            const response = await fetch(`/chat/update/${chatId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: summaryP.textContent })});
-            const summaryNotParsed = await response.json();
-            if (!response.ok) {
-                throw new Error(summaryNotParsed.message);
-            }
+            await fetch(`/chat/update/${chatId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: summaryP.textContent })});
             summaryP = null;
             summaryCounter = 0;
             FirstSummaryChunk = true;
@@ -226,11 +210,7 @@ summarizedTitle.addEventListener('click', function() {
         renamePanel.appendChild(cancelButton);
         document.body.appendChild(renamePanel);
         renameButton.addEventListener('click',async function() {
-            const response = await fetch(`/chat/update/${chatId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: renameInput.value })});
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message);
-            }
+            await fetch(`/chat/update/${chatId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: renameInput.value })});
             window.location.href = `/${chatId}`;
         });
         cancelButton.addEventListener('click', function() {
@@ -250,11 +230,7 @@ summarizedTitle.addEventListener('click', function() {
         deletePanel.appendChild(cancelButton);
         document.body.appendChild(deletePanel);
         deleteButton.addEventListener('click', async function() {
-            const response = await fetch(`/chat/remove/${chatId}`, { method: "DELETE" });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message);
-            }
+            await fetch(`/chat/remove/${chatId}`, { method: "DELETE" });
             window.location.href = '/';
         });
         cancelButton.addEventListener('click', function() {

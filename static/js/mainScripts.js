@@ -19,11 +19,7 @@ async function sendMessage() {
         throw new Error(data.message);
     }
     const newChat = data.newChat;
-    const message = await fetch(`/message/add/${newChat._id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sender: 'user', message: userInput.value, count: 1 }) });
-    const messageData = await message.json();
-    if (!message.ok) {
-        throw new Error(messageData.message);
-    }
+    await fetch(`/message/add/${newChat._id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sender: 'user', message: userInput.value, count: 1 }) });
     sendToWebSocket(userInput.value, 'libra', []);
     userInput.value = '';
     window.location.href = `/${newChat._id}`;
@@ -50,11 +46,7 @@ deleteAllButton.addEventListener('click', function() {
     deletePanel.appendChild(cancelButton);
     document.body.appendChild(deletePanel);
     deleteButton.addEventListener('click', async function() {
-        const response = await fetch('/chat/removeAll', { method: "DELETE" });
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.message);
-        }
+        await fetch('/chat/removeAll', { method: "DELETE" });
         window.location.href = '/';
     });
     cancelButton.addEventListener('click', function() {

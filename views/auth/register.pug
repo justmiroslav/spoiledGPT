@@ -1,0 +1,35 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(rel="stylesheet", type="text/css", href="/css/authStyles.css")
+        title Register
+    body
+        #title
+            h1 Welcome to SpoiledGPT
+            img(src="/img/mainIcon.jpg", alt="")
+        #myForm
+            span#error-textInput.error-message
+            label Enter the unique username
+            input(type="text", id="textInput", placeholder="username")
+            span#error-emailInput.error-message
+            label Enter your email
+            input(type="email", id="emailInput", placeholder="email address")
+            span#error-passwordInput.error-message
+            label Create a new password
+            input(type="password", id="passwordInput", placeholder="password")
+            span#error-confirmPasswordInput.error-message
+            label Confirm your new password
+            input(type="password", id="confirmPasswordInput", placeholder="confirm password")
+            #requirements
+                p#uppercaseReq At least one uppercase letter
+                p#lowercaseReq At least one lowercase letter
+                p#numberReq At least one number
+                p#specialCharReq At least one special character
+                p#lengthReq Minimum 8 characters
+                p#passwordStatus
+                    span
+            button#submit Submit
+            div#results
+        script(src="/js/authScripts/register.js")

@@ -3,9 +3,10 @@ const sortChats = require('../helpers/sortChats');
 const Message = require('../models/messageModel');
 
 async function getMainPage(req, res) {
-    let chats = await Chat.find({});
+    const { username } = req.cookies;
+    let chats = await Chat.find({}).sort({ date: -1 });
     let groupedChats = sortChats(chats);
-    res.render('main', { chats: groupedChats });
+    res.render('main', { chats: groupedChats, username: username});
 }
 
 async function getChat(req, res) {
@@ -31,9 +32,9 @@ async function updateChat(req, res) {
     const { title } = req.body;
     try {
         await Chat.updateOne({_id: id}, {title: title});
-        res.status(200).json({ updateChat: 'Chat updated' });
+        res.sendStatus(200);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.sendStatus(500);
     }
 }
 
@@ -41,18 +42,18 @@ async function removeChat(req, res) {
     const { id } = req.params;
     try {
         await Chat.deleteOne({_id: id});
-        res.status(200).json({ removeChat: 'Chat removed' });
+        res.sendStatus(200);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.sendStatus(500);
     }
 }
 
 async function removeAllChats(req, res) {
     try {
         await Chat.deleteMany({});
-        res.status(200).json({ removeAll: 'All chats removed' });
+        res.sendStatus(200);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.sendStatus(500);
     }
 }
 

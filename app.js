@@ -8,6 +8,7 @@ const routes = require('./routes');
 const path = require('path');
 const http = require('http');
 const WebSocket = require('ws');
+const cookieParser = require('cookie-parser');
 const runAI = require('./controllers/wsController');
 
 const app = express();
@@ -17,15 +18,17 @@ server.listen(appConfigs.wssPort, () => {
     console.log(`WS Server listening on port ${appConfigs.wssPort}`);
 });
 
-app.use(express.static(path.join(__dirname, 'static')));
+app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use("/auth", routes.authRoutes);
 app.use("/message", routes.messageRoutes);
 app.use("/chat", routes.chatRoutes);
 app.use("/", routes.appRoutes);
+app.use(express.static(path.join(__dirname, 'static')));
 app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'views/auth')]);
 
 const startServer = async () => {
     try {

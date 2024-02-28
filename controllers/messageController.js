@@ -48,9 +48,9 @@ async function updateMessage(req, res) {
     const { message } = req.body;
     try {
         await Message.updateOne({_id: id}, {message: message});
-        res.status(200).json({updateMessage: 'Message updated'});
+        res.sendStatus(200);
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.sendStatus(500);
     }
 }
 
@@ -59,9 +59,9 @@ async function deleteSelectedMessage(req, res) {
     const { count } = req.body;
     try {
         await Message.deleteMany({chatId: chatId, count: {$gt: count}});
-        res.status(200).json({deleteMessage: 'Messages removed'});
+        res.sendStatus(200);
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.sendStatus(500);
     }
 }
 
