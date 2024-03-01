@@ -14,27 +14,24 @@ html(lang="en")
                     img(src="/img/mainIcon.jpg", alt="")
                     p SpoiledGPT
             #summarized-title
-            if title
                 i.fas.fa-chevron-down
                 p= title
-            select(id="model-selector")
-                option(value="libra" selected) libra
-                option(value="sparky") sparky
-            p(id="model-description")
+            #model
+                select(id="model-selector")
+                    option(value="libra" selected) libra
+                    option(value="sparky") sparky
+                p(id="model-description")
         main
             #chat-content
                 each message in messages
-                    p(class=message.sender, id=message._id)= message.message
+                    div(id=message._id)
+                        p(class=message.sender)= message.message
                         if message.sender === 'user'
-                            span
-                                i.fas.fa-pencil-alt(id=message._id)
+                            i.fas.fa-pencil-alt(id=message._id)
                         else if message.sender === 'assistant'
-                            span
+                            div
                                 i.fas.fa-copy(id=message._id)
-                                | copy
-                            span
                                 i.fas.fa-redo(id=message._id)
-                                | retry
             #message-send
                 input(type="text", id="user-input", autocomplete="off", name="message", placeholder="Send message...")
                 button(id="submit-button")

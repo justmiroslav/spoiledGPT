@@ -6,7 +6,6 @@ function runAI(ws) {
     ws.on('message', async (data) => {
         const { message, model, context } = JSON.parse(data);
         const response = await axios.post(pythonServer, {message: message, model: model, context: context});
-        console.log(typeof response.data.context);
         const answer = response.data.answer;
         const delay = calculateDelay(answer.length);
         ws.send(JSON.stringify({type: 'context', content: response.data.context, length: response.data.context.length}));

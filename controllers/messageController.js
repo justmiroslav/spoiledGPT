@@ -1,8 +1,8 @@
 const Message = require('../models/messageModel');
 
 async function createMessage(req, res) {
-    const { chatId } = req.params;
-    const { sender, message, count } = req.body;
+    const { chatId, count } = req.params;
+    const { sender, message } = req.body;
     try {
         const newMessage = await new Message({ chatId: chatId, sender: sender, message: message, count: count });
         newMessage.save();
@@ -23,8 +23,7 @@ async function getMessages(req, res) {
 }
 
 async function getMessage(req, res) {
-    const { chatId } = req.params;
-    const { count } = req.body;
+    const { chatId, count } = req.params;
     try {
         const message = await Message.findOne({chatId: chatId, count: count});
         res.status(200).json({findMessage: message});
@@ -33,11 +32,22 @@ async function getMessage(req, res) {
     }
 }
 
-async function returnMessagesCount(req, res) {
-    const { chatId } = req.params;
+async function getMessageById(req, res) {
+    const { id } = req.params;
     try {
-        const count = await Message.countDocuments({chatId: chatId});
-        res.status(200).json({count: count});
+        const message = await Message.findById({_id: id});
+        res.status(200).json({messageId: message});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}
+
+async function getPreviousMessage(req, res) {
+    const { chatId, id } = req.params;
+    try {
+        const message = await Message.findById(id);
+        const previousMessage = await Message.find({chatId: chatId, date: {$lt: message.date}}).sort({date: -1});
+        res.status(200).json({previousMessage: previousMessage[0]});
     } catch (error) {
         res.status(500).json({message: error.message});
     }
@@ -55,10 +65,28 @@ async function updateMessage(req, res) {
 }
 
 async function deleteSelectedMessage(req, res) {
-    const { chatId } = req.params;
-    const { count } = req.body;
+    const { chatId, count } = req.params;
     try {
         await Message.deleteMany({chatId: chatId, count: {$gt: count}});
+        res.sendStatus(200);
+    } catch (error) {
+        res.sendStatus(500);
+    }
+}
+
+async function deleteMessagesFromChat(req, res) {
+    const { chatId } = req.params;
+    try {
+        await Message.deleteMany({chatId: chatId});
+        res.sendStatus(200);
+    } catch (error) {
+        res.sendStatus(500);
+    }
+}
+
+async function deleteAllMessages(req, res) {
+    try {
+        await Message.deleteMany({});
         res.sendStatus(200);
     } catch (error) {
         res.sendStatus(500);
@@ -69,7 +97,10 @@ module.exports = {
     createMessage,
     getMessages,
     getMessage,
-    returnMessagesCount,
+    getMessageById,
+    getPreviousMessage,
     updateMessage,
-    deleteSelectedMessage
+    deleteSelectedMessage,
+    deleteMessagesFromChat,
+    deleteAllMessages
 };

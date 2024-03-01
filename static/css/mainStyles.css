@@ -1,68 +1,232 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-}
-
-header {
-    background-color: #333;
-    color: #fff;
-    padding: 10px 0;
-    text-align: center;
-}
-
-#ai-icon img {
-    width: 50px;
-    border-radius: 50%;
-}
-
-#ai-icon p {
-    display: inline-block;
-    margin-left: 10px;
-    vertical-align: middle;
+    background-color: #f8f9fa;
 }
 
 main {
-    margin: 20px;
+    text-align: center;
+    margin: 4em auto;
+    width: 40%;
+}
+
+#user-initial {
+    position: fixed;
+    top: 1em;
+    right: 1em;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #333;
+    color: #fff;
+}
+
+#user-initial p {
+    margin: 0;
+}
+
+#ai-icon {
+    cursor: pointer;
+}
+
+#ai-icon img {
+    width: 5em;
+    height: auto;
+}
+
+#ai-icon p {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+h1 {
+    font-size: 40px;
+    color: #343a40;
+    margin-top: 20px;
 }
 
 #new-chat {
     display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+    align-self: center;
+    border: 1px solid #1a2a29;
+    border-radius: 100px;
+    position: fixed;
+    top: 40%;
+    width: 40%;
+    padding: 0.5em;
 }
 
-#new-chat input {
-    flex-grow: 1;
-    margin-right: 10px;
-    padding: 5px;
-}
-
-#new-chat button {
-    background-color: #333;
-    color: #fff;
+#main-user-input {
+    background: transparent;
     border: none;
-    padding: 5px 10px;
+    width: 95%;
+    height: 2em;
+    border-radius: 100px;
+    padding-left: 0.5em;
+}
+
+input:focus {
+    outline: none;
+}
+
+#main-start-button {
+    border: none;
+    height: 2em;
+    width: 2em;
+    border-radius: 100px;
+    background-color: #1a2a29;
+    color: #fff;
     cursor: pointer;
 }
 
-#existing-chats h2 {
-    color: #333;
+#existing-chats {
+    margin-top: 7em;
 }
 
-#existing-chats button {
-    display: block;
-    margin: 10px 0;
-    padding: 5px;
-    cursor: pointer;
+#chats-title {
+    justify-content: center;
+    display: flex;
+}
+
+#chats-title h2 {
+    font-size: 24px;
+    color: #343a40;
 }
 
 #delete-all {
-    background-color: #f00;
-    color: #fff;
+    transform: translateY(-0.155em);
+    background-color: transparent;
     border: none;
-    padding: 5px 10px;
+    color: #343a40;
+    font-size: 18px;
     cursor: pointer;
-    float: right;
+}
+
+#delete-all:hover {
+    color: #c82333;
+}
+
+#delete-all:focus {
+    outline: none;
+}
+
+.chat-group {
+    margin-top: -0.5em;
+}
+
+.chat-title {
+    font-size: 20px;
+    color: #999;
+    text-align: left;
+    margin: 0 0 1em 1em;
+}
+
+.chat-button {
+    color: #333;
+    background-color: #dcf8c6;
+    border: none;
+    padding: 0.5em;
+    border-radius: 100px;
+    cursor: pointer;
+    text-align: center;
+    margin: 0.5em auto;
+    font-size: 18px;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+}
+
+.chat-button:hover {
+    background-color: #c3f9b8;
+}
+
+#edit-modal {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+#edit-input {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+.button-group {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+#save-button, #cancel-button {
+    width: 100px;
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+#save-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#cancel-button {
+    background-color: #f0f0f0;
+    color: black;
+}
+
+#logout-modal {
+    position: absolute;
+    z-index: 1;
+    left: 92%;
+    top: 6%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#logout-modal .modal-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5em;
+    height: 2.5em;
+}
+
+#logout-modal button {
+    background-color: transparent;
+    color: #333;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 1em;
+    text-align: center;
+}
+
+#logout-modal button:hover {
+    color: #4CAF50;
 }

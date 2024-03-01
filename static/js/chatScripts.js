@@ -4,90 +4,77 @@ const messageInput = document.getElementById('user-input');
 const summarizedTitle = document.getElementById('summarized-title');
 const submitButton = document.getElementById('submit-button');
 const chatId = window.location.pathname.split('/')[1];
-const response = await fetch(`/message/count/${chatId}`, { method: "GET" });
-const countMessage = await response.json();
-if (!response.ok) {
-    throw new Error(countMessage.message);
-}
-let messageCounter = countMessage.count;
+let messageCounter;
+let idToCount = {};
 let context = [];
 let FirstAnswerChunk = true;
 let messageP = null;
 let responsesCounter = 0;
 let summaryCounter = 0;
 let FirstSummaryChunk = true;
+let isOpen = false;
 let summaryP = null;
+const modal = document.createElement('div');
+modal.id = 'edit-modal';
+modal.innerHTML = `
+    <div class="modal-content">
+        <input type="text" id="edit-input" />
+        <div>
+            <button id="save-button">Save</button>
+            <button id="cancel-button">Cancel</button>
+        </div>
+    </div>
+`;
+document.body.appendChild(modal);
+modal.style.display = 'none';
+const newModal = document.createElement('div');
+newModal.id = 'summary-modal';
+newModal.innerHTML = `
+    <div class="modal-content">
+        <button id="rename-option">Rename</button>
+        <button id="delete-option">Delete</button>
+    </div>
+`;
+document.body.appendChild(newModal);
+newModal.style.display = 'none';
+const editInput = document.getElementById('edit-input');
+const saveButton = document.getElementById('save-button');
+const cancelButton = document.getElementById('cancel-button');
+const renameOption = document.getElementById('rename-option');
+const deleteOption = document.getElementById('delete-option');
 
 window.onload = async function() {
     const modelSelector = document.getElementById('model-selector');
     const modelDescription = document.getElementById('model-description');
     if (modelSelector.value === 'libra') {
-        modelDescription.textContent = 'AI assistant focused on providing fast and helpful responses';
+        modelDescription.textContent = 'fast and helpful responses';
     } else if (modelSelector.value === 'sparky') {
-        modelDescription.textContent = 'AI assistant created for open-ended conversations on any topic';
+        modelDescription.textContent = 'open-ended conversations on any topic';
     }
-
     modelSelector.addEventListener('change', function() {
         if (modelSelector.value === 'libra') {
-            modelDescription.textContent = 'AI assistant focused on providing fast and helpful responses';
+            modelDescription.textContent = 'fast and helpful responses';
         } else if (modelSelector.value === 'sparky') {
-            modelDescription.textContent = 'AI assistant created for open-ended conversations on any topic';
+            modelDescription.textContent = 'open-ended conversations on any topic';
         }
     });
-
-    // const response = await fetch(`/message/get/all/${chatId}`, { method: "GET" });
-    // const messagesNotParsed = await response.json();
-    // if (!response.ok) {
-    //     throw new Error(messagesNotParsed.message);
-    // }
-    // const messages = messagesNotParsed.messages;
-    // console.log(messages);
-    // messages.forEach(message => {
-    //     console.log(message);
-    //     const editIcon = document.getElementById(message._id);
-    //     const copyIcon = document.getElementById(message._id);
-    //     const retryIcon = document.getElementById(message._id);
-    //     editIcon.addEventListener('click', function() {
-    //         const messageP = document.getElementById(editIcon.id);
-    //         const editInput = document.createElement('input');
-    //         const editButton = document.createElement('button');
-    //         const cancelButton = document.createElement('button');
-    //         editInput.value = messageP.textContent;
-    //         editButton.textContent = 'Edit';
-    //         cancelButton.textContent = 'Cancel';
-    //         chatContent.appendChild(editInput);
-    //         chatContent.appendChild(editButton);
-    //         chatContent.appendChild(cancelButton);
-    //         editButton.addEventListener('click', async function() {
-    //             await fetch(`/message/delete/${chatId}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count: message.count })});
-    //             await fetch(`/message/update/${message._id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: editInput.value })});
-    //             messageCounter = message.count;
-    //             const index = context.findIndex(item => item["content"] === messageP.textContent);
-    //             context.splice(index);
-    //             sendToWebSocket(editInput.value, modelSelector.value, context);
-    //         });
-    //         cancelButton.addEventListener('click', function() {
-    //             window.location.href = `/${chatId}`;
-    //         });
-    //     });
-    //     copyIcon.addEventListener('click', function() {
-    //         const messageP = document.getElementById(copyIcon.id);
-    //         navigator.clipboard.writeText(messageP.textContent);
-    //     });
-    //     retryIcon.addEventListener('click', async function() {
-    //         const messageNotParsed = await fetch(`/message/get/${chatId}`, { method: "GET", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count: message.count - 1 })});
-    //         const messageDb = await messageNotParsed.json();
-    //         if (!messageNotParsed.ok) {
-    //             throw new Error(messageDb.message);
-    //         }
-    //         const messageP = messageDb.findMessage;
-    //         await fetch(`/message/delete/${chatId}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count: message.count - 1 })});
-    //         messageCounter = message.count - 1;
-    //         const index = context.findIndex(item => item["content"] === messageP);
-    //         context.splice(index);
-    //         sendToWebSocket(messageP, modelSelector.value, context);
-    //     });
-    // });
+    const response = await fetch(`/message/get/all/${chatId}`, { method: "GET"});
+    const messagesNotParsed = await response.json();
+    if (!response.ok) {
+        throw new Error(messagesNotParsed.message);
+    }
+    const endpoint = window.location.pathname;
+    const messages = messagesNotParsed.messages;
+    messageCounter = messages.length;
+    const firstMessage = localStorage.getItem(endpoint);
+    if (firstMessage === null) {
+        sendToWebSocket(messages[0].message, "libra", []);
+        localStorage.setItem(endpoint, 'true');
+    }
+    for (let i = 0; i < messages.length; i++) {
+        context.push({role: messages[i].sender, content: messages[i].message});
+        idToCount[messages[i]._id] = messages[i].count;
+    }
 }
 
 function sendToWebSocket(message, model, context) {
@@ -101,15 +88,18 @@ function sendToWebSocket(message, model, context) {
 async function sendMessage() {
     const messageInput = document.getElementById('user-input');
     const modelSelector = document.getElementById('model-selector');
-    const userMessage = document.createElement('p');
+    const userMessage = document.createElement('div');
+    const messageText = document.createElement('p');
     const editIcon = document.createElement('i');
-    userMessage.className = 'user';
-    userMessage.textContent = messageInput.value;
+    messageText.className = 'user';
+    messageText.textContent = messageInput.value;
     editIcon.className = 'fas fa-pencil-alt';
+    userMessage.appendChild(messageText);
     userMessage.appendChild(editIcon);
     chatContent.appendChild(userMessage);
+    chatContent.scrollTop = chatContent.scrollHeight;
     messageCounter++;
-    const response = await fetch(`/message/add/${chatId}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sender: 'user', message: userMessage.textContent, count: messageCounter })});
+    const response = await fetch(`/message/add/${chatId}/${messageCounter}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sender: messageText.className, message: messageText.textContent }) });
     const messageNotParsed = await response.json();
     if (!response.ok) {
         throw new Error(messageNotParsed.message);
@@ -117,6 +107,7 @@ async function sendMessage() {
     const message = messageNotParsed.newMessage;
     userMessage.id = message._id;
     editIcon.id = message._id;
+    idToCount[message._id] = message.count;
     sendToWebSocket(messageInput.value, modelSelector.value, context);
     messageInput.value = '';
 }
@@ -136,34 +127,37 @@ ws.onmessage = async function(event) {
     } else if (data.type === 'message') {
         let messageLength = data.length;
         if (FirstAnswerChunk) {
-            messageP = document.createElement('p');
-            messageP.className = 'assistant';
-            chatContent.appendChild(messageP);
-            FirstAnswerChunk = false;
-        }
-        messageP.textContent += data.content;
-        responsesCounter++;
-        if (responsesCounter === messageLength) {
+            messageP = document.createElement('div');
+            const messageText = document.createElement('p');
+            const messageButtons = document.createElement('div');
             const copyIcon = document.createElement('i');
-            const copyText = document.createTextNode(' copy');
             const retryIcon = document.createElement('i');
-            const retryText = document.createTextNode(' retry');
             copyIcon.className = 'fas fa-copy';
             retryIcon.className = 'fas fa-redo';
-            messageP.appendChild(copyIcon);
-            messageP.appendChild(copyText);
-            messageP.appendChild(retryIcon);
-            messageP.appendChild(retryText);
+            messageText.className = 'assistant';
+            messageButtons.appendChild(copyIcon);
+            messageButtons.appendChild(retryIcon);
+            messageP.appendChild(messageText);
+            messageP.appendChild(messageButtons);
+            chatContent.appendChild(messageP);
+            chatContent.scrollTop = chatContent.scrollHeight;
+            FirstAnswerChunk = false;
+        }
+        messageP.firstChild.innerHTML += data.content.replace(/\n/g, '<br>');
+        chatContent.scrollTop = chatContent.scrollHeight;
+        responsesCounter++;
+        if (responsesCounter === messageLength) {
             messageCounter++;
-            const response = await fetch(`/message/add/${chatId}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sender: 'assistant', message: messageP.textContent, count: messageCounter })});
+            const response = await fetch(`/message/add/${chatId}/${messageCounter}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sender: messageP.firstChild.className, message: messageP.firstChild.textContent })});
             const messageNotParsed = await response.json();
             if (!response.ok) {
                 throw new Error(messageNotParsed.message);
             }
             const message = messageNotParsed.newMessage;
             messageP.id = message._id;
-            copyIcon.id = message._id;
-            retryIcon.id = message._id;
+            messageP.lastChild.firstChild.id = message._id;
+            messageP.lastChild.lastChild.id = message._id;
+            idToCount[message._id] = message.count;
             messageP = null;
             responsesCounter = 0;
             FirstAnswerChunk = true;
@@ -174,6 +168,7 @@ ws.onmessage = async function(event) {
             const icon = document.createElement('i');
             summaryP = document.createElement('p');
             icon.className = 'fas fa-chevron-down';
+            summarizedTitle.innerHTML = '';
             summarizedTitle.appendChild(icon);
             summarizedTitle.appendChild(summaryP);
             FirstSummaryChunk = false;
@@ -189,52 +184,130 @@ ws.onmessage = async function(event) {
     }
 };
 
+chatContent.addEventListener('click', async function(event) {
+    if (event.target.tagName === 'I') {
+        const messageId = event.target.id;
+        const response = await fetch(`/message/get/id/${messageId}`, { method: "GET" });
+        const messageNotParsed = await response.json();
+        if (!response.ok) {
+            throw new Error(messageNotParsed.message);
+        }
+        const message = messageNotParsed.messageId;
+        const messageDiv = document.getElementById(message._id);
+        const messageP = messageDiv.firstChild;
+        const modelSelector = document.getElementById('model-selector');
+        if (event.target.classList.contains('fa-pencil-alt')) {
+            editInput.value = messageP.textContent;
+            modal.style.display = 'block';
+            saveButton.onclick = async function() {
+                const index = context.findIndex(item => item["content"] === messageP.textContent);
+                context.splice(index);
+                messageP.textContent = editInput.value;
+                modal.style.display = 'none';
+                messageCounter = message.count;
+                await fetch(`/message/delete/${chatId}/${message.count}`, { method: "DELETE" });
+                await fetch(`/message/update/${messageId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: messageP.textContent })});
+                Array.from(chatContent.children).forEach(child => {
+                    const childCount = idToCount[child.id];
+                    if (childCount > messageCounter) {
+                        chatContent.removeChild(child);
+                    }
+                });
+                sendToWebSocket(messageP.textContent, modelSelector.value, context);
+            };
+            cancelButton.onclick = function() {
+                modal.style.display = 'none';
+            };
+            window.onkeydown = function(event) {
+                if (event.key === 'Enter') {
+                    saveButton.click();
+                } else if (event.key === 'Escape') {
+                    cancelButton.click();
+                }
+            };
+        } else if (event.target.classList.contains('fa-copy')) {
+            await navigator.clipboard.writeText(messageP.textContent);
+        } else if (event.target.classList.contains('fa-redo')) {
+            const previousMessage = await fetch(`/message/get/prev/${chatId}/${message._id}`, { method: "GET" });
+            const previousMessageNotParsed = await previousMessage.json();
+            if (!previousMessage.ok) {
+                throw new Error(previousMessageNotParsed.message);
+            }
+            const previous = previousMessageNotParsed.previousMessage;
+            console.log(previous.message);
+            messageCounter = previous.count;
+            await fetch(`/message/delete/${chatId}/${messageCounter}`, { method: "DELETE" });
+            const index = context.findIndex(item => item["content"] === previous.message);
+            context.splice(index);
+            Array.from(chatContent.children).forEach(child => {
+                const childCount = idToCount[child.id];
+                if (childCount > messageCounter) {
+                    chatContent.removeChild(child);
+                }
+            });
+            sendToWebSocket(previous.message, modelSelector.value, context);
+        }
+    }
+});
+
 summarizedTitle.addEventListener('click', function() {
-    summary.icon.className = 'fas fa-chevron-up';
-    const renameOption = document.createElement('button');
-    renameOption.textContent = 'Rename chat';
-    const deleteOption = document.createElement('button');
-    deleteOption.textContent = 'Delete chat';
-    document.body.appendChild(renameOption);
-    document.body.appendChild(deleteOption);
+    newModal.style.display = 'block';
+    isOpen = true;
+    document.addEventListener('click', handleDocumentClick);
     renameOption.addEventListener('click', function() {
-        const renamePanel = document.createElement('div');
-        const renameInput = document.createElement('input');
-        renameInput.value = summary.title;
-        const renameButton = document.createElement('button');
-        renameButton.textContent = 'Rename';
-        const cancelButton = document.createElement('button');
-        cancelButton.textContent = 'Cancel';
-        renamePanel.appendChild(renameInput);
-        renamePanel.appendChild(renameButton);
-        renamePanel.appendChild(cancelButton);
-        document.body.appendChild(renamePanel);
-        renameButton.addEventListener('click',async function() {
-            await fetch(`/chat/update/${chatId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: renameInput.value })});
-            window.location.href = `/${chatId}`;
-        });
-        cancelButton.addEventListener('click', function() {
-            window.location.href = `/${chatId}`;
-        });
+        editInput.value = summarizedTitle.lastChild.textContent;
+        modal.style.display = 'block';
+        saveButton.onclick = async function() {
+            summarizedTitle.lastChild.textContent = editInput.value;
+            await fetch(`/chat/update/${chatId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: summarizedTitle.lastChild.textContent })});
+            modal.style.display = 'none';
+        };
+        cancelButton.onclick = function() {
+            modal.style.display = 'none';
+        };
+        window.onkeydown = function(event) {
+            if (event.key === 'Enter') {
+                saveButton.click();
+            } else if (event.key === 'Escape') {
+                cancelButton.click();
+            }
+        };
+        newModal.style.display = 'none';
     });
     deleteOption.addEventListener('click', function() {
-        const deletePanel = document.createElement('div');
-        const question = document.createElement('p');
-        question.textContent = 'Are you sure you want to delete this chat?';
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        const cancelButton = document.createElement('button');
-        cancelButton.textContent = 'Cancel';
-        deletePanel.appendChild(question);
-        deletePanel.appendChild(deleteButton);
-        deletePanel.appendChild(cancelButton);
-        document.body.appendChild(deletePanel);
-        deleteButton.addEventListener('click', async function() {
+        editInput.replaceWith(document.createTextNode('Are you sure you want to delete this chat?'));
+        saveButton.textContent = 'Delete';
+        saveButton.style.backgroundColor = '#f44336';
+        modal.style.display = 'block';
+        saveButton.onclick = async function() {
+            modal.style.display = 'none';
+            await fetch(`/message/delete/all/${chatId}`, { method: "DELETE" });
             await fetch(`/chat/remove/${chatId}`, { method: "DELETE" });
             window.location.href = '/';
-        });
-        cancelButton.addEventListener('click', function() {
-            window.location.href = `/${chatId}`;
-        });
+        };
+        cancelButton.onclick = function() {
+            modal.style.display = 'none';
+        };
+        window.onkeydown = function(event) {
+            if (event.key === 'Enter') {
+                saveButton.click();
+            } else if (event.key === 'Escape') {
+                cancelButton.click();
+            }
+        };
+        newModal.style.display = 'none';
     });
+    window.onkeydown = function(event) {
+        if (event.key === 'Escape') {
+            newModal.style.display = 'none';
+        }
+    };
 });
+
+function handleDocumentClick(event) {
+    if (isOpen && !newModal.contains(event.target) && !summarizedTitle.contains(event.target)) {
+        newModal.style.display = 'none';
+        isOpen = false;
+        document.removeEventListener('click', handleDocumentClick);
+    }
+}

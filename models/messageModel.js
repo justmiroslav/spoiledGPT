@@ -6,6 +6,7 @@ const messageSchema = new mongoose.Schema({
     sender: String,
     message: String,
     count: Number,
+    date: { type: Date, default: Date.now }
 });
 
 const Message = mongoose.model('Message', messageSchema);

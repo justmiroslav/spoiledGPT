@@ -8,11 +8,12 @@ html(lang="en")
         link(rel="stylesheet", href="/css/mainStyles.css")
         title SpoiledGPT
     body
-        header
+        #user-initial
+            p= username[0].toUpperCase()
+        main
             #ai-icon
                 img(src="/img/mainIcon.jpg", alt="")
                 p SpoiledGPT
-        main
             h1 Welcome, #{username}
             #new-chat
                 input(type="text", id="main-user-input", autocomplete="off", name="message", placeholder="Start new chat...")
@@ -20,12 +21,15 @@ html(lang="en")
                     i.fas.fa-arrow-up
             #existing-chats
                 #chats-title
-                    h2 All conversations
-                    if chats.length >= 2
-                        button(id="delete-all") X
+                    if Object.values(chats).flat().length > 0
+                        h2 All conversations
+                        if Object.values(chats).flat().length >= 2
+                            button(id="delete-all")
+                                i.fas.fa-trash
                 each group, groupName in chats
-                    h2= groupName
-                    each chat in group
-                        a(href=`/${chat._id}`)
-                            button(type="submit") #{chat.title}
+                    if group.length > 0
+                        .chat-group
+                            .chat-title= groupName
+                            each chat in group
+                                a(href=`/${chat._id}`, class="chat-button") #{chat.title}
         script(type="module", src="/js/mainScripts.js")

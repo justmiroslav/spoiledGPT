@@ -1,109 +1,131 @@
-body {
+body, html {
+    height: 100%;
     margin: 0;
-    padding: 0;
-    background-color: #e0cdc9;
 }
 
 header {
-    margin: 1em 1em 0 1em;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px 20px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
-img {
-    width: auto;
-    height: 2em;
-}
-
-p, h1, h2, h3, h4, h5, h6 {
-    color: #1a2a29;
-}
-
-p {
-    font-size: 1.25em;
-}
-
-#ai-icon, #summarized-title {
+#ai-icon a {
     display: flex;
-    padding-bottom: 0;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
 }
 
 #ai-icon img {
-    margin-right: 0.5em;
+    height: 50px;
+    width: auto;
+    margin-right: 10px;
 }
 
-#ai-icon p {
-    margin-top: 0.05em;
+#ai-icon p, #summarized-title p, #model-description {
+    margin: 0;
+    color: #333;
     font-weight: bold;
 }
 
-#summarized-title i {
-    margin-top: 0.55em;
-    margin-right: 0.25em;
+#summarized-title, #model {
+    display: flex;
+    align-items: center;
 }
 
-#summarized-title p {
-    font-style: italic;
-    margin-top: 0.08em;
-    color: #1a2a29;
+#summarized-title {
+    cursor: pointer;
+    position: relative;
 }
 
-#model-description {
-    margin-top: 1em;
+#summarized-title:hover {
+    text-decoration: underline;
+}
+
+#model {
+    flex-direction: column;
+}
+
+#model-selector {
+    border-color: transparent;
+    appearance: none;
+    text-align: center;
+    width: 5em;
+    cursor: pointer;
+    background-color: transparent;
+    color: #333;
+}
+
+#model-selector:focus {
+    outline: none;
+    appearance: none;
+}
+
+#model p {
+    color: #333;
 }
 
 main {
-    margin: 0 auto;
-    width: 60%;
+    height: calc(100% - 12.5em);
     display: flex;
     flex-direction: column;
+    width: 50%;
+    margin: 0 auto;
     align-items: center;
 }
 
 #chat-content {
-    background-color: transparent;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    height: 400px;
+    padding: 1em;
     overflow-y: auto;
+    scrollbar-width: none;
+    scrollbar-color: transparent transparent;
+}
+
+#chat-content::-webkit-scrollbar {
+    display: none;
+}
+
+#chat-content p {
+    display: inline-block;
+    padding: 0.75em;
 }
 
 #chat-content .user {
-    background-color: #1a2a29;
-    color: #e0cdc9;
     border-radius: 15px 0 15px 15px;
-    padding: 10px;
-    margin: 5px;
-    position: relative;
-    text-align: right;
-}
-
-#chat-content .user::after {
-    content: "User";
-    font-weight: bold;
-    position: absolute;
-    margin-left: 0.75em;
-    color: #1a2a29;
+    background-color: #dcf8c6;
+    float: right;
 }
 
 #chat-content .assistant {
-    background-color: #0d1514;
-    color: #e0cdc9;
     border-radius: 0 15px 15px 15px;
-    padding: 10px;
-    margin: 5px;
-    position: relative;
+    background-color: #f1f0f0;
     text-align: left;
 }
 
-#chat-content .assistant::before {
-    content: "Assistant";
-    font-weight: bold;
-    position: absolute;
-    margin-left: -5em;
-    color: #0d1514;
+#chat-content i {
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.fa-pencil-alt, .fa-copy, .fa-redo {
+    font-size: 14px;
+    color: #999;
+}
+
+.fa-pencil-alt {
+    float: right;
+    margin: 1.25em 1em 0 0;
+}
+
+.fa-copy, .fa-redo {
+    transform: translateY(-0.5em);
+}
+
+.fa-pencil-alt:hover, .fa-copy:hover, .fa-redo:hover {
+    color: #333;
 }
 
 #message-send {
@@ -129,10 +151,6 @@ input:focus {
     outline: none;
 }
 
-#message-send input::placeholder {
-    color: #1a2a29;
-}
-
 #message-send button {
     border: none;
     height: 2em;
@@ -141,4 +159,93 @@ input:focus {
     background-color: #1a2a29;
     color: #fff;
     cursor: pointer;
+}
+
+#edit-modal {
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+#edit-input {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+}
+
+.button-group {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+#save-button, #cancel-button {
+    width: 100px;
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+#save-button {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#cancel-button {
+    background-color: #f0f0f0;
+    color: black;
+}
+
+#summary-modal {
+    position: absolute;
+    z-index: 1;
+    left: 47.5%;
+    top: 15.5%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#summary-modal .modal-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5em;
+    height: 5em;
+}
+
+#summary-modal button {
+    background-color: transparent;
+    color: #333;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 1em;
+    text-align: center;
+}
+
+#summary-modal button:hover {
+    color: #4CAF50;
 }
