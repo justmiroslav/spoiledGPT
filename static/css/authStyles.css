@@ -15,6 +15,10 @@ img {
     height: 2em;
 }
 
+h1 {
+    text-align: center;
+}
+
 #myForm {
     max-width: 600px;
     margin: -10px auto 0;

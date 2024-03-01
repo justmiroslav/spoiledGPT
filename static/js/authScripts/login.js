@@ -1,6 +1,8 @@
 const myForm = document.getElementById("myForm");
+const usernameInput = document.getElementById("textInput");
 const passwordInput = document.getElementById("passwordInput");
 const errorPassword = document.getElementById("error-passwordInput");
+const errorUsername = document.getElementById("error-textInput");
 const submitButton = document.getElementById("submit");
 const resultsDiv = document.getElementById("results");
 const username = window.username;
@@ -14,37 +16,38 @@ myForm.addEventListener("keydown", async (event) => {
 });
 
 async function submitForm() {
-    let hasError = false;
+    let userValue = "";
+    if (!username) {
+        const usernameValue = usernameInput.value.trim();
+        if (!usernameValue) {
+            errorUsername.textContent = "This field is required";
+            usernameInput.value = "";
+            return;
+        }
+        userValue = usernameValue;
+    }
 
-    if (passwordInput.value.trim() === "") {
+    const passwordValue = passwordInput.value.trim();
+    if (!passwordValue) {
         errorPassword.textContent = "This field is required";
-        hasError = true;
-    } else {
-        errorPassword.textContent = "";
+        passwordInput.value = "";
     }
-
-    if (hasError) {
-        return;
-    }
+    errorPassword.textContent = "";
 
     const data = {
-        username: username,
-        password: passwordInput.value
+        username: username || userValue,
+        password: passwordValue
     };
-
-    passwordInput.value = "";
 
     const response = await fetch('/auth/post/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
     const result = await response.json();
+
     if (!response.ok) {
-        if (result.message === 'Invalid password') {
-            errorPassword.textContent = result.message;
-        } else {
-            resultsDiv.innerHTML = `
-                <p>${result.message}</p>
-                <button onclick="window.location.href='/auth/register'">Try Register</button>
-            `;
-        }
+        errorPassword.textContent = result.message === 'Invalid password' ? result.message : '';
+        resultsDiv.innerHTML = `
+            <p>${result.message}</p>
+            <button onclick="window.location.href='/auth/register'">Try Register</button>
+        `;
     } else {
         window.location.href = '/';
     }

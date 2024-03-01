@@ -7,9 +7,15 @@ html(lang="en")
     title Login
     body
         #title
+        if username
             h1 Hello, #{username}
-            img(src="/img/mainIcon.jpg", alt="")
+        else
+            h1 Hello
         #myForm
+            if !username
+                span#error-textInput.error-message
+                label Please, enter your username to login
+                input(type="text", id="textInput", placeholder="username")
             span#error-passwordInput.error-message
             label Please, enter your password to login
             input(type="password", id="passwordInput", placeholder="password")

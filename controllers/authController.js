@@ -17,6 +17,11 @@ function getLoginPage(req, res) {
     res.render('login', { username: username });
 }
 
+function logoutUser(req, res) {
+    res.clearCookie('token');
+    res.render('login');
+}
+
 async function registerUser(req, res) {
     const { username, email, password } = req.body;
     const candidateByUsername = await User.findOne({ username: username });
@@ -52,5 +57,6 @@ module.exports = {
     getLoginPage,
     getRegisterPage,
     registerUser,
-    loginUser
+    loginUser,
+    logoutUser
 }
