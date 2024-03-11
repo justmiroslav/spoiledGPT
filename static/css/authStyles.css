@@ -28,6 +28,26 @@ h1 {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
+#myForm h2 {
+    text-align: center;
+    color: #343a40;
+}
+
+#auth-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#auth-buttons a {
+    text-decoration: none;
+    color: white;
+}
+
+#auth-buttons button:hover {
+    background-color: cornflowerblue;
+}
+
 label {
     display: block;
     margin-bottom: 5px;
@@ -60,9 +80,9 @@ button {
     border: none;
     border-radius: 1000px;
     cursor: pointer;
-    width: 20%;
     font-size: 16px;
     display: block;
+    text-decoration: none;
 }
 
 button:hover {

@@ -24,10 +24,12 @@ html(lang="en")
         main
             #chat-content
                 each message in messages
-                    div(id=message._id)
-                        p(class=message.sender)= message.message
+                    div(id=message._id, class="message-div")
+                        p(class=message.sender)!= message.message.replace(/\n/g, '<br>')
                         if message.sender === 'user'
-                            i.fas.fa-pencil-alt(id=message._id)
+                            div
+                                i.fas.fa-pencil-alt(id=message._id)
+                                i.fas.fa-trash-alt(id=message._id)
                         else if message.sender === 'assistant'
                             div
                                 i.fas.fa-copy(id=message._id)
@@ -36,4 +38,12 @@ html(lang="en")
                 input(type="text", id="user-input", autocomplete="off", name="message", placeholder="Send message...")
                 button(id="submit-button")
                     i.fas.fa-arrow-up
+        script.
+            let messageDivs = document.querySelectorAll('.message-div');
+            messageDivs.forEach(div => {
+                let userMessage = div.querySelector('.user');
+                if (userMessage) {
+                    div.style.textAlign = 'right';
+                }
+            });
         script(type="module", src="/js/chatScripts.js")

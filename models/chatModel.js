@@ -3,7 +3,7 @@ const mongoose = mongoConnection.mongo;
 
 const chatSchema = new mongoose.Schema({
     title: String,
-    userId: String,
+    user: String,
     date: {type: Date, default: Date.now}
 });
 

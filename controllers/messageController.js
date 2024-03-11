@@ -64,7 +64,27 @@ async function updateMessage(req, res) {
     }
 }
 
-async function deleteSelectedMessage(req, res) {
+async function updateMessageCount(req, res) {
+    const { id, count } = req.params;
+    try {
+        await Message.updateOne({_id: id}, {count: count});
+        res.sendStatus(200);
+    } catch (error) {
+        res.sendStatus(500);
+    }
+}
+
+async function deleteOneMessage(req, res) {
+    const { chatId, count } = req.params;
+    try {
+        await Message.deleteOne({chatId: chatId, count: count});
+        res.sendStatus(200);
+    } catch (error) {
+        res.sendStatus(500);
+    }
+}
+
+async function deleteSelectedMessages(req, res) {
     const { chatId, count } = req.params;
     try {
         await Message.deleteMany({chatId: chatId, count: {$gt: count}});
@@ -100,7 +120,9 @@ module.exports = {
     getMessageById,
     getPreviousMessage,
     updateMessage,
-    deleteSelectedMessage,
+    updateMessageCount,
+    deleteOneMessage,
+    deleteSelectedMessages,
     deleteMessagesFromChat,
     deleteAllMessages
 };

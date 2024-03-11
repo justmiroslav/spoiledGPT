@@ -90,23 +90,33 @@ async function sendMessage() {
     const modelSelector = document.getElementById('model-selector');
     const userMessage = document.createElement('div');
     const messageText = document.createElement('p');
+    const messageButtons = document.createElement('div');
     const editIcon = document.createElement('i');
+    const deleteIcon = document.createElement('i');
     messageText.className = 'user';
-    messageText.textContent = messageInput.value;
+    messageText.textContent = messageInput.value.replace(/\n/g, '<br>');
+    const text = messageText.textContent.replace(/<br>/g, '\n');
     editIcon.className = 'fas fa-pencil-alt';
+    deleteIcon.className = 'fas fa-trash-alt';
+    messageButtons.appendChild(editIcon);
+    messageButtons.appendChild(deleteIcon);
     userMessage.appendChild(messageText);
-    userMessage.appendChild(editIcon);
+    userMessage.appendChild(messageButtons);
     chatContent.appendChild(userMessage);
     chatContent.scrollTop = chatContent.scrollHeight;
     messageCounter++;
-    const response = await fetch(`/message/add/${chatId}/${messageCounter}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sender: messageText.className, message: messageText.textContent }) });
+    const response = await fetch(`/message/add/${chatId}/${messageCounter}`,
+        { method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sender: messageText.className, message: text }) });
     const messageNotParsed = await response.json();
     if (!response.ok) {
         throw new Error(messageNotParsed.message);
     }
     const message = messageNotParsed.newMessage;
     userMessage.id = message._id;
-    editIcon.id = message._id;
+    userMessage.className = "message-div";
+    userMessage.lastChild.firstChild.id = message._id;
+    userMessage.lastChild.lastChild.id = message._id;
     idToCount[message._id] = message.count;
     sendToWebSocket(messageInput.value, modelSelector.value, context);
     messageInput.value = '';
@@ -148,12 +158,16 @@ ws.onmessage = async function(event) {
         responsesCounter++;
         if (responsesCounter === messageLength) {
             messageCounter++;
-            const response = await fetch(`/message/add/${chatId}/${messageCounter}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sender: messageP.firstChild.className, message: messageP.firstChild.textContent })});
+            const text = messageP.firstChild.innerHTML.replace(/<br>/g, '\n');
+            const response = await fetch(`/message/add/${chatId}/${messageCounter}`,
+                { method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sender: messageP.firstChild.className, message: text })});
             const messageNotParsed = await response.json();
             if (!response.ok) {
                 throw new Error(messageNotParsed.message);
             }
             const message = messageNotParsed.newMessage;
+            messageP.className = "message-div";
             messageP.id = message._id;
             messageP.lastChild.firstChild.id = message._id;
             messageP.lastChild.lastChild.id = message._id;
@@ -176,7 +190,9 @@ ws.onmessage = async function(event) {
         summaryP.textContent += data.content;
         summaryCounter++;
         if (summaryCounter === summaryLength) {
-            await fetch(`/chat/update/${chatId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: summaryP.textContent })});
+            await fetch(`/chat/update/${chatId}`, { method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: summaryP.textContent })});
             summaryP = null;
             summaryCounter = 0;
             FirstSummaryChunk = true;
@@ -199,34 +215,65 @@ chatContent.addEventListener('click', async function(event) {
         if (event.target.classList.contains('fa-pencil-alt')) {
             editInput.value = messageP.textContent;
             modal.style.display = 'block';
-            saveButton.onclick = async function() {
+            saveButton.onclick = async function () {
                 const index = context.findIndex(item => item["content"] === messageP.textContent);
                 context.splice(index);
                 messageP.textContent = editInput.value;
                 modal.style.display = 'none';
                 messageCounter = message.count;
-                await fetch(`/message/delete/${chatId}/${message.count}`, { method: "DELETE" });
-                await fetch(`/message/update/${messageId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: messageP.textContent })});
+                await fetch(`/message/delete/${chatId}/${message.count}`, {method: "DELETE"});
+                await fetch(`/message/update/${messageId}`, {
+                    method: "PATCH",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({message: messageP.textContent})
+                });
                 Array.from(chatContent.children).forEach(child => {
                     const childCount = idToCount[child.id];
                     if (childCount > messageCounter) {
                         chatContent.removeChild(child);
                     }
                 });
+                for (let id in idToCount) {
+                    if (idToCount[id] >= message.count) {
+                        delete idToCount[id];
+                    }
+                }
                 sendToWebSocket(messageP.textContent, modelSelector.value, context);
             };
-            cancelButton.onclick = function() {
+            cancelButton.onclick = function () {
                 modal.style.display = 'none';
             };
-            window.onkeydown = function(event) {
+            window.onkeydown = function (event) {
                 if (event.key === 'Enter') {
                     saveButton.click();
                 } else if (event.key === 'Escape') {
                     cancelButton.click();
                 }
             };
+        } else if (event.target.classList.contains('fa-trash-alt')) {
+            const messageCount = message.count;
+            const nextMessageCount = messageCount + 1;
+            await fetch(`/message/delete/one/${chatId}/${messageCount}`, { method: "DELETE" });
+            await fetch(`/message/delete/one/${chatId}/${nextMessageCount}`, { method: "DELETE" });
+            Array.from(chatContent.children).forEach(child => {
+                const childCount = idToCount[child.id];
+                if (childCount === messageCount || childCount === nextMessageCount) {
+                    chatContent.removeChild(child);
+                }
+            });
+            const index = context.findIndex(item => item["content"] === messageP.textContent);
+            context.splice(index, 2);
+            for (let id in idToCount) {
+                if (idToCount[id] === messageCount || idToCount[id] === nextMessageCount) {
+                    delete idToCount[id];
+                }
+                if (idToCount[id] > nextMessageCount) {
+                    idToCount[id] -= 2;
+                    await fetch(`/message/update/count/${id}/${idToCount[id]}`, { method: "PATCH" });
+                }
+            }
         } else if (event.target.classList.contains('fa-copy')) {
-            await navigator.clipboard.writeText(messageP.textContent);
+            await navigator.clipboard.writeText(messageP.innerHTML.replace(/<br>/g, '\n'));
         } else if (event.target.classList.contains('fa-redo')) {
             const previousMessage = await fetch(`/message/get/prev/${chatId}/${message._id}`, { method: "GET" });
             const previousMessageNotParsed = await previousMessage.json();
@@ -234,7 +281,6 @@ chatContent.addEventListener('click', async function(event) {
                 throw new Error(previousMessageNotParsed.message);
             }
             const previous = previousMessageNotParsed.previousMessage;
-            console.log(previous.message);
             messageCounter = previous.count;
             await fetch(`/message/delete/${chatId}/${messageCounter}`, { method: "DELETE" });
             const index = context.findIndex(item => item["content"] === previous.message);
@@ -245,6 +291,11 @@ chatContent.addEventListener('click', async function(event) {
                     chatContent.removeChild(child);
                 }
             });
+            for (let id in idToCount) {
+                if (idToCount[id] >= previous.count) {
+                    delete idToCount[id];
+                }
+            }
             sendToWebSocket(previous.message, modelSelector.value, context);
         }
     }
@@ -259,7 +310,9 @@ summarizedTitle.addEventListener('click', function() {
         modal.style.display = 'block';
         saveButton.onclick = async function() {
             summarizedTitle.lastChild.textContent = editInput.value;
-            await fetch(`/chat/update/${chatId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: summarizedTitle.lastChild.textContent })});
+            await fetch(`/chat/update/${chatId}`, { method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: summarizedTitle.lastChild.textContent })});
             modal.style.display = 'none';
         };
         cancelButton.onclick = function() {

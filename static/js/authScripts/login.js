@@ -5,7 +5,6 @@ const errorPassword = document.getElementById("error-passwordInput");
 const errorUsername = document.getElementById("error-textInput");
 const submitButton = document.getElementById("submit");
 const resultsDiv = document.getElementById("results");
-const username = window.username;
 
 submitButton.addEventListener("click", submitForm);
 myForm.addEventListener("keydown", async (event) => {
@@ -16,16 +15,12 @@ myForm.addEventListener("keydown", async (event) => {
 });
 
 async function submitForm() {
-    let userValue = "";
-    if (!username) {
-        const usernameValue = usernameInput.value.trim();
-        if (!usernameValue) {
-            errorUsername.textContent = "This field is required";
-            usernameInput.value = "";
-            return;
-        }
-        userValue = usernameValue;
+    const usernameValue = usernameInput.value.trim();
+    if (!usernameValue) {
+        errorUsername.textContent = "This field is required";
+        usernameInput.value = "";
     }
+    errorUsername.textContent = "";
 
     const passwordValue = passwordInput.value.trim();
     if (!passwordValue) {
@@ -35,7 +30,7 @@ async function submitForm() {
     errorPassword.textContent = "";
 
     const data = {
-        username: username || userValue,
+        username: usernameValue,
         password: passwordValue
     };
 
@@ -43,11 +38,14 @@ async function submitForm() {
     const result = await response.json();
 
     if (!response.ok) {
-        errorPassword.textContent = result.message === 'Invalid password' ? result.message : '';
-        resultsDiv.innerHTML = `
-            <p>${result.message}</p>
-            <button onclick="window.location.href='/auth/register'">Try Register</button>
+        if (result.message === 'Invalid password') {
+            errorPassword.textContent = result.message;
+        } else {
+            resultsDiv.innerHTML = `
+            <p style="color: #ff0000">${result.message}</p>
+            <button style="display: flex" onclick="window.location.href='/auth/register'">Try Register</button>
         `;
+        }
     } else {
         window.location.href = '/';
     }

@@ -1,0 +1,19 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(rel="stylesheet", type="text/css", href="/css/authStyles.css")
+    title Logout
+    body
+        #title
+            h1 Welcome back, #{username}
+        #myForm
+            span#error-passwordInput.error-message
+            label Please, enter your password to login
+            input(type="password", id="passwordInput", placeholder="password")
+            button#submit Submit
+            div#results
+        script.
+            window.username = "#{username}";
+        script(src="/js/authScripts/logout.js")

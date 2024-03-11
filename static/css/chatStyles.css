@@ -78,10 +78,9 @@ main {
 }
 
 #chat-content {
+    width: 100%;
     padding: 1em;
     overflow-y: auto;
-    scrollbar-width: none;
-    scrollbar-color: transparent transparent;
 }
 
 #chat-content::-webkit-scrollbar {
@@ -96,7 +95,6 @@ main {
 #chat-content .user {
     border-radius: 15px 0 15px 15px;
     background-color: #dcf8c6;
-    float: right;
 }
 
 #chat-content .assistant {
@@ -107,24 +105,26 @@ main {
 
 #chat-content i {
     cursor: pointer;
-    margin-left: 10px;
 }
 
-.fa-pencil-alt, .fa-copy, .fa-redo {
+.fa-pencil-alt, .fa-trash-alt, .fa-copy, .fa-redo {
     font-size: 14px;
     color: #999;
 }
 
-.fa-pencil-alt {
-    float: right;
-    margin: 1.25em 1em 0 0;
-}
-
-.fa-copy, .fa-redo {
+.fa-copy, .fa-redo, .fa-trash-alt, .fa-pencil-alt {
     transform: translateY(-0.5em);
 }
 
-.fa-pencil-alt:hover, .fa-copy:hover, .fa-redo:hover {
+.fa-pencil-alt, .fa-trash-alt {
+    margin-right: 0.5em;
+}
+
+.fa-copy, .fa-redo {
+    margin-left: 0.5em;
+}
+
+.fa-pencil-alt:hover, .fa-trash-alt:hover, .fa-copy:hover, .fa-redo:hover {
     color: #333;
 }
 

@@ -1,22 +1,20 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
 const secret = require('../configs/secret');
 
 async function authMiddleware(req, res, next) {
-    let username;
-    const token = req.cookies.token;
-    if (!token) {
-        return res.redirect('/auth/register');
+    const username = req.cookies.username;
+    if (!username) {
+        return res.redirect('/auth');
     }
     try {
-        const decoded = jwt.verify(token, secret);
-        const user = await User.findOne({ _id: decoded.userId });
-        req.user = user.username;
-        username = user.username;
+        const token = req.cookies[`${username}_token`];
+        await jwt.verify(token, secret);
         next();
-    } catch {
-        req.cookie('username', username, { httpOnly: true });
-        return res.redirect('/auth/login');
+    } catch (error) {
+       if (error.name === 'TokenExpiredError') {
+           return res.redirect('/auth/relogin');
+       }
+       return res.redirect('/auth/login');
     }
 }
 

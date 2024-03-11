@@ -144,8 +144,11 @@ async function submitForm() {
         } else {
             errorEmail.textContent = result.message;
         }
-        resultsDiv.innerHTML = `<button onclick="window.location.href='/auth/login'">Try Login</button>`;
+        resultsDiv.innerHTML = `
+            <p style="color: #ff0000">Invalid data</p>
+            <button style="display: flex" onclick="window.location.href='/auth/login'">Try Login</button>
+        `;
     } else {
-        window.location.href = '/auth/login';
+        window.location.href = '/';
     }
 }

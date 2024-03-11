@@ -6,6 +6,7 @@ const appConfigs = require('./configs/appConfig');
 const mongoConnection = require('./connections/mongoConnection');
 const routes = require('./routes');
 const path = require('path');
+const favicon = require('serve-favicon');
 const http = require('http');
 const WebSocket = require('ws');
 const cookieParser = require('cookie-parser');
@@ -18,6 +19,7 @@ server.listen(appConfigs.wssPort, () => {
     console.log(`WS Server listening on port ${appConfigs.wssPort}`);
 });
 
+app.use(favicon(path.join(__dirname, 'static', 'img', 'favicon.PNG')));
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: false }));
